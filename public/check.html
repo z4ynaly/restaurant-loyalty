@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Check Your Balance</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f7f7f7;
+      min-height: 100vh;
+      padding: 0 0 40px 0;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #e67e22, #d35400);
+      color: white;
+      padding: 28px 20px 48px;
+      text-align: center;
+    }
+    .header .restaurant-name {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .header .tagline {
+      font-size: 14px;
+      opacity: 0.85;
+    }
+
+    /* ── Floating card ── */
+    .card {
+      background: white;
+      border-radius: 16px;
+      margin: -28px 16px 0;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+    }
+
+    /* ── Phone lookup form ── */
+    #lookupForm h3 {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 16px;
+    }
+    .input-group {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .input-group input {
+      flex: 1;
+      padding: 13px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .input-group input:focus {
+      border-color: #e67e22;
+    }
+    .btn-check {
+      padding: 13px 20px;
+      background: #e67e22;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-check:active { background: #d35400; }
+
+    .error-msg {
+      margin-top: 12px;
+      background: #fde8e8;
+      color: #c0392b;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    /* ── Balance result ── */
+    #resultSection { display: none; }
+
+    .customer-greeting {
+      font-size: 15px;
+      color: #555;
+      margin-bottom: 16px;
+    }
+    .customer-greeting strong {
+      color: #222;
+    }
+
+    /* Coin balance big display */
+    .balance-display {
+      background: linear-gradient(135deg, #fff8f0, #fde8cc);
+      border: 1.5px solid #f5cba7;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .balance-display .coin-icon { font-size: 36px; }
+    .balance-display .coin-amount {
+      font-size: 48px;
+      font-weight: 800;
+      color: #e67e22;
+      line-height: 1.1;
+    }
+    .balance-display .coin-label {
+      font-size: 13px;
+      color: #a0522d;
+      margin-top: 2px;
+    }
+    .balance-display .worth {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    /* Tier badge */
+    .tier-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    /* Next tier progress */
+    .tier-progress {
+      background: #f5f5f5;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .tier-progress .tp-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .progress-bar-bg {
+      background: #e0e0e0;
+      border-radius: 99px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(to right, #f39c12, #e67e22);
+      transition: width 0.8s ease;
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stat-box {
+      flex: 1;
+      background: #f9f9f9;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-box .s-val {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+    }
+    .stat-box .s-label {
+      font-size: 11px;
+      color: #999;
+      margin-top: 2px;
+    }
+
+    /* Transaction history */
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .txn-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 11px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .txn-item:last-child { border-bottom: none; }
+    .txn-left .txn-type {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+    .txn-left .txn-date {
+      font-size: 11px;
+      color: #bbb;
+      margin-top: 2px;
+    }
+    .txn-right {
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .txn-right.earn  { color: #27ae60; }
+    .txn-right.redeem { color: #e74c3c; }
+
+    .no-txns {
+      text-align: center;
+      color: #bbb;
+      font-size: 13px;
+      padding: 16px 0;
+    }
+
+    /* Check again button */
+    .btn-back {
+      width: 100%;
+      padding: 13px;
+      background: #f5f5f5;
+      color: #555;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    /* Loading state */
+    #loadingState {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: #888;
+      font-size: 14px;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #f0f0f0;
+      border-top-color: #e67e22;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 11px;
+      color: #bbb;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="restaurant-name" id="restaurantName">Loading...</div>
+  <div class="tagline">Your Loyalty Rewards</div>
+</div>
+
+<div class="card">
+
+  <!-- Phone lookup -->
+  <div id="lookupForm">
+    <h3>Check your coin balance</h3>
+    <div class="input-group">
+      <input
+        type="tel"
+        id="phoneInput"
+        placeholder="Enter your phone number"
+        maxlength="15"
+        inputmode="numeric"
+        onkeydown="if(event.key==='Enter') checkBalance()"
+      >
+      <button class="btn-check" onclick="checkBalance()">Check</button>
+    </div>
+    <div id="errorMsg" class="error-msg" style="display:none"></div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingState">
+    <div class="spinner"></div>
+    Looking up your account...
+  </div>
+
+  <!-- Result -->
+  <div id="resultSection">
+    <p class="customer-greeting">Welcome back, <strong id="custName"></strong>!</p>
+
+    <div class="balance-display">
+      <div class="coin-icon">🪙</div>
+      <div class="coin-amount" id="coinBalance">0</div>
+      <div class="coin-label">coins available</div>
+      <div class="worth" id="coinWorth"></div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="tier-badge" id="tierBadge"></span>
+    </div>
+
+    <div class="tier-progress" id="tierProgressBox">
+      <div class="tp-label">
+        <span id="tierProgressLabel"></span>
+        <span id="tierProgressVal"></span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="s-val" id="totalSpent">₹0</div>
+        <div class="s-label">Total spent</div>
+      </div>
+      <div class="stat-box">
+        <div class="s-val" id="memberSince">—</div>
+        <div class="s-label">Member since</div>
+      </div>
+    </div>
+
+    <div class="section-title">Recent visits</div>
+    <div id="txnList"></div>
+
+    <button class="btn-back" onclick="resetForm()">← Check another number</button>
+  </div>
+
+</div>
+
+<div class="footer">Powered by LoyaltyPro</div>
+
+<script>
+  // Get restaurant ID from URL: /check?r=1
+  const params = new URLSearchParams(window.location.search);
+  const restaurantId = params.get('r');
+
+  // Load restaurant name on page load
+  window.onload = async () => {
+    if (!restaurantId) {
+      document.getElementById('restaurantName').textContent = 'Loyalty Rewards';
+      return;
+    }
+    try {
+      const res = await fetch(`/api/restaurant/public/${restaurantId}`);
+      const data = await res.json();
+      if (data.name) {
+        document.getElementById('restaurantName').textContent = data.name;
+        document.title = `${data.name} — Loyalty Balance`;
+      }
+    } catch (e) {}
+  };
+
+  async function checkBalance() {
+    const phone = document.getElementById('phoneInput').value.trim();
+    const errEl = document.getElementById('errorMsg');
+    errEl.style.display = 'none';
+
+    if (!phone || phone.length < 10) {
+      errEl.textContent = 'Please enter a valid phone number.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (!restaurantId) {
+      errEl.textContent = 'Invalid link. Please ask the restaurant for the correct link.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    // Show loading
+    document.getElementById('lookupForm').style.display = 'none';
+    document.getElementById('loadingState').style.display = 'block';
+
+    try {
+      const res = await fetch(`/api/customer/lookup?phone=${encodeURIComponent(phone)}&restaurant_id=${restaurantId}`);
+      const data = await res.json();
+
+      document.getElementById('loadingState').style.display = 'none';
+
+      if (!data.success) {
+        document.getElementById('lookupForm').style.display = 'block';
+        errEl.textContent = data.error || 'Something went wrong. Try again.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      renderResult(data.customer, data.transactions);
+    } catch (e) {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('lookupForm').style.display = 'block';
+      errEl.textContent = 'Network error. Please try again.';
+      errEl.style.display = 'block';
+    }
+  }
+
+  function renderResult(customer, transactions) {
+    // Basic info
+    document.getElementById('custName').textContent = customer.name;
+    document.getElementById('coinBalance').textContent = customer.coin_balance.toLocaleString();
+    document.getElementById('totalSpent').textContent = '₹' + customer.total_spent.toLocaleString();
+    document.getElementById('memberSince').textContent = formatDate(customer.created_at, true);
+
+    // Coin worth (1 coin = ₹0.10 redemption value — you can change this)
+    const worth = (customer.coin_balance * 0.10).toFixed(2);
+    document.getElementById('coinWorth').textContent = `Worth approx. ₹${worth} in discounts`;
+
+    // Tier badge
+    const tierEmoji = { Bronze: '🥉', Silver: '🥈', Gold: '🥇', Platinum: '💎' };
+    const tierBg = { Bronze: '#fdf6ec', Silver: '#f0f0f0', Gold: '#fff8e7', Platinum: '#f3f0ff' };
+    const tierTextColor = { Bronze: '#92400e', Silver: '#4b5563', Gold: '#92400e', Platinum: '#5b21b6' };
+    const badge = document.getElementById('tierBadge');
+    badge.textContent = `${tierEmoji[customer.tier]} ${customer.tier} Member`;
+    badge.style.background = tierBg[customer.tier];
+    badge.style.color = tierTextColor[customer.tier];
+    badge.style.border = `1px solid ${customer.tierColor}44`;
+
+    // Tier progress bar
+    const progressBox = document.getElementById('tierProgressBox');
+    if (customer.nextTier) {
+      const tierThresholds = { Silver: 1000, Gold: 5000, Platinum: 10000 };
+      const currentThreshold = { Bronze: 0, Silver: 1000, Gold: 5000 }[customer.tier] || 0;
+      const spent = customer.total_spent;
+      const progress = Math.min(100, ((spent - currentThreshold) / (customer.nextTierSpend - currentThreshold)) * 100);
+      const remaining = Math.max(0, customer.nextTierSpend - spent);
+
+      document.getElementById('tierProgressLabel').textContent =
+        `Spend ₹${remaining.toLocaleString()} more to reach ${customer.nextTier}`;
+      document.getElementById('tierProgressVal').textContent =
+        `₹${spent.toLocaleString()} / ₹${customer.nextTierSpend.toLocaleString()}`;
+      document.getElementById('progressFill').style.width = progress + '%';
+      progressBox.style.display = 'block';
+    } else {
+      progressBox.innerHTML = `<div style="text-align:center;font-size:13px;color:#7c3aed;font-weight:600">💎 You've reached the highest tier — Platinum!</div>`;
+    }
+
+    // Transactions
+    const txnList = document.getElementById('txnList');
+    if (!transactions || transactions.length === 0) {
+      txnList.innerHTML = '<div class="no-txns">No visits yet</div>';
+    } else {
+      txnList.innerHTML = transactions.map(t => {
+        const isEarn = t.type === 'earn';
+        const coinText = isEarn
+          ? `+${t.coins_earned} coins`
+          : `-${t.coins_redeemed} coins`;
+        const label = isEarn
+          ? `Visited · ₹${t.bill_amount}`
+          : `Redeemed coins`;
+        return `
+          <div class="txn-item">
+            <div class="txn-left">
+              <div class="txn-type">${label}</div>
+              <div class="txn-date">${formatDate(t.created_at)}</div>
+            </div>
+            <div class="txn-right ${t.type}">${coinText}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('resultSection').style.display = 'block';
+  }
+
+  function formatDate(dateStr, shortYear = false) {
+    const d = new Date(dateStr);
+    if (isNaN(d)) return '—';
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    if (shortYear) return `${months[d.getMonth()]} ${d.getFullYear()}`;
+    return `${d.getDate()} ${months[d.getMonth()]}, ${d.getFullYear().toString().slice(2)} · ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+  }
+
+  function resetForm() {
+    document.getElementById('resultSection').style.display = 'none';
+    document.getElementById('lookupForm').style.display = 'block';
+    document.getElementById('phoneInput').value = '';
+    document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('phoneInput').focus();
+  }
+</script>
+
+</body>
+</html>

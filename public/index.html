@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LoyaltyPro - Restaurant Loyalty</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="page active">
+  <div class="auth-box">
+    <h1>🍽️ LoyaltyPro</h1>
+    <p>Restaurant Loyalty Program</p>
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('login')">Login</button>
+      <button class="tab" onclick="showTab('register')">Register</button>
+    </div>
+
+    <div id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Restaurant Email">
+      <input type="password" id="loginPassword" placeholder="Password">
+      <button class="btn-primary" onclick="login()">Login</button>
+    </div>
+
+    <div id="registerForm" style="display:none">
+      <input type="text" id="regName" placeholder="Restaurant Name">
+      <input type="email" id="regEmail" placeholder="Email">
+      <input type="password" id="regPassword" placeholder="Password">
+      <button class="btn-primary" onclick="register()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboardPage" class="page">
+  <nav>
+    <h2>🍽️ LoyaltyPro</h2>
+    <span id="restaurantName"></span>
+    <a href="menu.html" class="btn-menu-link">📋 Menu</a>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </nav>
+
+  <div class="stats" id="statsBar"></div>
+
+  <div class="main-grid">
+    <!-- LEFT: Add Transaction -->
+    <div class="card">
+      <h3>➕ Add Transaction</h3>
+      <input type="tel" id="txnPhone" placeholder="Customer Phone Number" oninput="lookupCustomer()">
+      <div id="customerInfo" class="customer-info" style="display:none"></div>
+
+      <div id="newCustomerForm" style="display:none">
+        <p style="color:orange">New customer! Add their details:</p>
+        <input type="text" id="newName" placeholder="Customer Name">
+        <input type="email" id="newEmail" placeholder="Customer Email (for notifications)">
+        <button class="btn-secondary" onclick="registerCustomer()">Add Customer</button>
+      </div>
+
+      <div id="transactionForm" style="display:none">
+        <input type="number" id="billAmount" placeholder="Bill Amount (₹)" min="1">
+        <select id="txnType">
+          <option value="earn">Earn Coins</option>
+          <option value="redeem">Redeem Coins</option>
+        </select>
+        <input type="text" id="txnNote" placeholder="Note (optional)">
+        <button class="btn-primary" onclick="submitTransaction()">Submit</button>
+      </div>
+
+      <div id="txnResult" class="result-box" style="display:none"></div>
+    </div>
+
+    <!-- RIGHT: Customer List -->
+    <div class="card">
+      <h3>👥 All Customers</h3>
+      <input type="text" id="searchBox" placeholder="🔍 Search by name or phone" oninput="filterCustomers()">
+      <div id="customerList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
